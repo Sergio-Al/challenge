@@ -56,8 +56,16 @@ describe("Rare items behavior", () => {
 
   describe("'Backstage passes to a TAFKAL80ETC concert' Behavior", () => {
     it("Should Quality never be more than 50", () => {
-      const otherItem = new GR.Item("Backstage passes to a TAFKAL80ETC concert", 3, 50);
-      const itemExpected = new GR.Item("Backstage passes to a TAFKAL80ETC concert", 2, 50);
+      const otherItem = new GR.Item(
+        "Backstage passes to a TAFKAL80ETC concert",
+        3,
+        50
+      );
+      const itemExpected = new GR.Item(
+        "Backstage passes to a TAFKAL80ETC concert",
+        2,
+        50
+      );
 
       const curretlyStored = new GR.GildedRose([otherItem]);
       const expectedStored = [itemExpected];
@@ -66,7 +74,7 @@ describe("Rare items behavior", () => {
 
       assert.deepEqual(updatedItems, expectedStored);
     });
-    
+
     it("Should increases in quality as SellIn value approaches", () => {
       const otherItem = new GR.Item(
         "Backstage passes to a TAFKAL80ETC concert",
@@ -107,7 +115,7 @@ describe("Rare items behavior", () => {
       assert.deepEqual(updatedItems, expectedStored);
     });
 
-    it("Should Backstage...' increases in quality by 3 when there are 5 day or less", () => {
+    it("Should increases in quality by 3 when there are 5 day or less", () => {
       const otherItem = new GR.Item(
         "Backstage passes to a TAFKAL80ETC concert",
         5,
@@ -127,7 +135,7 @@ describe("Rare items behavior", () => {
       assert.deepEqual(updatedItems, expectedStored);
     });
 
-    it("Should Backstage...' drop to 0 after the concert", () => {
+    it("Should drop to 0 after the concert", () => {
       const otherItem = new GR.Item(
         "Backstage passes to a TAFKAL80ETC concert",
         0,
@@ -137,6 +145,39 @@ describe("Rare items behavior", () => {
         "Backstage passes to a TAFKAL80ETC concert",
         -1,
         0
+      );
+
+      const curretlyStored = new GR.GildedRose([otherItem]);
+      const expectedStored = [itemExpected];
+
+      const updatedItems = curretlyStored.updateQuality();
+
+      assert.deepEqual(updatedItems, expectedStored);
+    });
+  });
+
+  describe("'Conjured' Behavior", () => {
+    it("Should degrades twice after as fast as normal items", () => {
+      const otherItem = new GR.Item("Conjured", 12, 23);
+      const itemExpected = new GR.Item("Conjured", 11, 21);
+
+      const curretlyStored = new GR.GildedRose([otherItem]);
+      const expectedStored = [itemExpected];
+
+      const updatedItems = curretlyStored.updateQuality();
+
+      assert.deepEqual(updatedItems, expectedStored);
+    });
+    it("Should degrades twice after as fast as normal items below zero", () => {
+      const otherItem = new GR.Item(
+        "Conjured",
+        0,
+        23
+      );
+      const itemExpected = new GR.Item(
+        "Conjured",
+        -1,
+        19
       );
 
       const curretlyStored = new GR.GildedRose([otherItem]);
