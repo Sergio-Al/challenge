@@ -53,4 +53,4 @@ Run test cases
 npm test
 ```
 Your terminal shoul look as follows
-![test-cases](/assets/testCases.png)
+![test-cases](/game-02/assets/testCases.png)
