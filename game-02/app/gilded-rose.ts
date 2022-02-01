@@ -12,11 +12,9 @@ export class Item {
 
 export class GildedRose {
   items: Array<Item>;
-  limitQuality: number;
 
-  constructor(items = [] as Array<Item>, limitQuality = 50 as number) {
+  constructor(items = [] as Array<Item>) {
     this.items = items;
-    this.limitQuality = limitQuality;
   }
 
   updateQuality() {
