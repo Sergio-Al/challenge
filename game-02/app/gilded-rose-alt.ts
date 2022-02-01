@@ -20,24 +20,76 @@ export class GildedRose {
   }
 
   updateQuality() {
-    for (const currentItem of this.items) {
-      this.modifyQuantity(currentItem);
+    return this.items.map((item) => {
+      const itemType = classifyItem(item);
+
+      if (itemType.isSulfuras) return item;
+
+      item.sellIn--;
+
+      if (itemType.isBackstagePasses) {
+        this.modifyBackstageQuality(item);
+      } else if (itemType.isAgedBrie) {
+        this.modifyAgedQuality(item);
+      } else if (itemType.isCommon) {
+        this.modifyCommonQuality(item);
+      }
+
+      return item;
+    });
+  }
+
+  modifyCommonQuality(commonItem: Item) {
+    const areSellDatePassed = commonItem.sellIn < 0;
+    if (areSellDatePassed) {
+      this.decrementQuality(commonItem, 2);
+      return;
+    }
+    this.decrementQuality(commonItem);
+  }
+
+  modifyBackstageQuality(rareItem: Item) {
+    const tenDaysOrLessToSell = rareItem.sellIn < 11;
+    const fiveDaysOrLessToSell = rareItem.sellIn < 6;
+    const areSellDatePassed = rareItem.sellIn < 0;
+
+    if (areSellDatePassed) {
+      rareItem.quality = 0;
+      return;
     }
 
-    return this.items;
+    if (fiveDaysOrLessToSell) {
+      this.incrementQuality(rareItem, 3);
+      return;
+    }
+
+    if (tenDaysOrLessToSell) {
+      this.incrementQuality(rareItem, 2);
+      return;
+    }
+
+    this.incrementQuality(rareItem);
+  }
+
+  modifyAgedQuality(rareItem: Item) {
+    const areSellDatePassed = rareItem.sellIn < 0;
+    if (areSellDatePassed) {
+      this.incrementQuality(rareItem, 2);
+      return;
+    }
+    this.incrementQuality(rareItem);
   }
 
   modifyQuantity(currentItem: Item) {
-    if (
-      currentItem.name !== "Aged Brie" &&
-      currentItem.name !== "Backstage passes to a TAFKAL80ETC concert"
-    ) {
+    const itemType = classifyItem(currentItem);
+    if (itemType.isSulfuras) return;
+    if (!itemType.isAgedBrie && !itemType.isBackstagePasses) {
       this.decrementQuality(currentItem);
       if (currentItem.name === "Conjured") this.decrementQuality(currentItem);
     } else {
       if (currentItem.quality < this.limitQuality) {
         currentItem.quality++;
-        if (currentItem.name === "Backstage passes to a TAFKAL80ETC concert") {
+        if (itemType.isBackstagePasses) {
           if (currentItem.sellIn < 11) this.incrementQuality(currentItem);
           if (currentItem.sellIn < 6) this.incrementQuality(currentItem);
         }
@@ -47,8 +99,8 @@ export class GildedRose {
     currentItem.sellIn--;
 
     if (currentItem.sellIn < 0) {
-      if (currentItem.name != "Aged Brie") {
-        if (currentItem.name != "Backstage passes to a TAFKAL80ETC concert") {
+      if (!itemType.isAgedBrie) {
+        if (!itemType.isBackstagePasses) {
           this.decrementQuality(currentItem);
         } else {
           currentItem.quality = 0;
@@ -61,31 +113,38 @@ export class GildedRose {
 
   incrementQuality(current: Item, increment = 1 as number) {
     if (current.quality < this.limitQuality) {
-      current.quality += increment;
+      const newQuality = current.quality + increment;
+      current.quality =
+        newQuality > this.limitQuality ? this.limitQuality : newQuality;
     }
   }
 
   decrementQuality(current: Item, decrement = 1 as number) {
     if (current.quality > 0) {
-      current.quality -= decrement;
+      const newQuality = current.quality - decrement;
+      current.quality = newQuality < 0 ? 0 : newQuality;
     }
   }
 }
 
-// Test Items
-const firstItem = new Item("Backstage passes to a TAFKAL80ETC concert", 12, 14);
-const secondItem = new Item("Sulfuras, Hand of Ragnaros", 12, 80);
-const thirdItem = new Item("Aged Brie", 12, 14);
-const fourthItem = new Item("Conjured", 12, 14);
-const otherItem = new Item("Other awesome spell", 12, 14);
-const business = new GildedRose([
-  firstItem,
-  secondItem,
-  thirdItem,
-  fourthItem,
-  otherItem,
-]);
+type ItemTypes = {
+  isCommon: boolean;
+  isAgedBrie: boolean;
+  isBackstagePasses: boolean;
+  isSulfuras: boolean;
+};
 
-// Run this code with `npx ts-node GildedRose.ts`
-// Quit process with `control+C`
-setInterval(() => console.log(business.updateQuality()), 2000);
+export function classifyItem(item: Item): ItemTypes {
+  return {
+    isAgedBrie: item.name === "Aged Brie",
+    isSulfuras: item.name === "Sulfuras, Hand of Ragnaros",
+    isBackstagePasses:
+      item.name === "Backstage passes to a TAFKAL80ETC concert",
+    isCommon:
+      item.name !== "Aged Brie" &&
+      item.name !== "Sulfuras, Hand of Ragnaros" &&
+      item.name !== "Backstage passes to a TAFKAL80ETC concert",
+  };
+}
+
+
