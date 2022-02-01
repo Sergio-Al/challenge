@@ -1,5 +1,5 @@
 const assert = require("assert");
-const GR = require("../app/gilded-rose-alt");
+const GR = require("../app/gilded-rose");
 
 describe("Common items behavior", () => {
   it("Should degrade quality twice after sell by date has passed", () => {
